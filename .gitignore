@@ -1,2 +1,3 @@
-# Ignore the default location of server files
+# Ignore the default location of server and data files
 /server
+/data

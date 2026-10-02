@@ -12,6 +12,7 @@ services:
     ]
     volumes:
       - ${SERVER_PATH:-./server}:/opt/server
+      - ${DATA_PATH:-./data}:/home/steam/Zomboid
     ports:
       - ${SERVER_PORT:-16261}:16261/udp
     configs:

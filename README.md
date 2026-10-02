@@ -3,14 +3,15 @@
 Run a [Project Zomboid](https://projectzomboid.com/) dedicated server with Docker Compose.
 
 The game server files are installed and updated with [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)
-using the [`cm2network/steamcmd`](https://hub.docker.com/r/cm2network/steamcmd) image. They live on the host
-(`./server` by default), so your worlds, configs and mods persist between container restarts and updates.
+using the [`cm2network/steamcmd`](https://hub.docker.com/r/cm2network/steamcmd) image. Both the server files
+(`./server` by default) and the game data (`./data` by default: worlds, configs, mods and logs) live on the host, so
+they persist between container restarts and updates.
 
 ## Requirements
 
 - Linux host with [Docker](https://docs.docker.com/engine/install/) and the
   [Docker Compose plugin](https://docs.docker.com/compose/install/) (`docker compose`, v2.23+ for inline `configs`)
-- `bash` and `sudo` (the `update` script may need to fix ownership of the server folder)
+- `bash` and `sudo` (the `update` script may need to fix ownership of the server and data folders)
 - Enough disk space for the server files (a few GB)
 
 ## Quickstart
@@ -46,6 +47,7 @@ All settings are in [`.env`](.env):
 | `SERVER_NAME`    | `MyWorld`  | Name of the server/save. Determines which config and save files are used.                         |
 | `SERVER_PORT`    | `16261`    | Host UDP port mapped to the game server.                                                          |
 | `SERVER_FILES`   | `./server` | Host folder the `update` script installs server files into.                                       |
+| `DATA_FILES`     | `./data`   | Host folder for game data (saves, server configs, mods, logs), mounted at `/home/steam/Zomboid`.  |
 | `JVM_ARGS`       | _(none)_   | Extra JVM arguments, e.g. `-Xmx8g` to raise memory. See [JVM arguments][jvm].                     |
 
 See the wiki for more [server startup parameters][params].
@@ -55,8 +57,9 @@ See the wiki for more [server startup parameters][params].
 
 ### Server settings and mods
 
-After the first start, Project Zomboid writes its config files inside the server folder. Edit them while the server
-is stopped, then start it again. Details on available settings are on the
+After the first start, Project Zomboid writes its config files to the data folder, in `./data/Server/` (e.g.
+`<SERVER_NAME>.ini` and `<SERVER_NAME>_SandboxVars.lua`). Saves are under `./data/Saves/`. Edit configs while the
+server is stopped, then start it again. Details on available settings are on the
 [PZ wiki](https://pzwiki.net/wiki/Server_settings).
 
 ## Usage
@@ -82,17 +85,18 @@ docker compose up -d
 ## How it works
 
 - [`compose.yml`](compose.yml) defines a single `project-zomboid` service. It mounts the server folder at `/opt/server`
-  and launches the game's own `start-server.sh` with the name and admin credentials from `.env`.
+  and the data folder at `/home/steam/Zomboid` (where the game stores its saves and configs), and launches the game's
+  own `start-server.sh` with the name and admin credentials from `.env`.
 - An inline Compose config, `steamcmd-script`, holds the SteamCMD script that anonymously installs app `380870`
   (Project Zomboid Dedicated Server) into `/opt/server`.
-- [`update`](update) creates the server folder, makes sure it's owned by UID/GID `1000` (the `steam` user in the
-  container), then runs SteamCMD with that script in a one-off container.
+- [`update`](update) creates the server and data folders, makes sure they're owned by UID/GID `1000` (the `steam`
+  user in the container), then runs SteamCMD with that script in a one-off container.
 
 ## Troubleshooting
 
 - **`Admin password required, edit the .env file`**: set `ADMIN_PASSWORD` in `.env`.
 - **`start-server.sh: No such file or directory`**: the server files aren't installed yet, run `./update`.
-- **Permission errors in the server folder**: it must be owned by `1000:1000`. Running `./update` fixes this,
-  or run `sudo chown -R 1000:1000 ./server`.
+- **Permission errors in the server or data folder**: both must be owned by `1000:1000`. Running `./update` fixes
+  this, or run `sudo chown -R 1000:1000 ./server ./data`.
 - **Players can't connect**: make sure UDP port `16261` (or your `SERVER_PORT`) is open in your firewall and
   forwarded on your router.

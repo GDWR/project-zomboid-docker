@@ -18,7 +18,12 @@ if ! [[ $(stat --format '%u:%g' $SERVER_FILES) = '1000:1000' ]]; then
         echo "Requires root to fixup ownership of server folder"
         sudo chown 1000:1000 -R $SERVER_FILES
 fi
-
+mkdir -p $DATA_FILES
+# if the `data` folder is not `1000:1000`, set it.
+if ! [[ $(stat --format '%u:%g' $DATA_FILES) = '1000:1000' ]]; then
+        echo "Requires root to fixup ownership of data folder"
+        sudo chown 1000:1000 -R $DATA_FILES
+fi
 
 # Path inside the container to `steamcmd`, I wish it was just in PATH...
 STEAMCMD_PATH=/home/steam/steamcmd/steamcmd.sh
