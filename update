@@ -10,10 +10,10 @@ if ! [[ $(docker compose ps -q | wc -l) = "0" ]]; then
         exit 1
 fi
 
-# Load the .env file to know the `SERVER_FILES` and `DATA_FILES` values
+# Load the .env file to know the `SERVER_PATH` and `DATA_PATH` values
 source .env
 # Ensure each mounted folder exists and is owned by `1000:1000`.
-for dir in "$SERVER_FILES" "$DATA_FILES"; do
+for dir in "$SERVER_PATH" "$DATA_PATH"; do
         mkdir -p "$dir"
         if [[ $(stat --format '%u:%g' "$dir") != '1000:1000' ]]; then
                 echo "Requires root to fixup ownership of $dir"
