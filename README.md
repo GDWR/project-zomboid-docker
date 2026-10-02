@@ -46,8 +46,8 @@ All settings are in [`.env`](.env):
 | `ADMIN_USERNAME` | `admin`    | Username for the in-game admin account.                                                           |
 | `SERVER_NAME`    | `MyWorld`  | Name of the server/save. Determines which config and save files are used.                         |
 | `SERVER_PORT`    | `16261`    | Host UDP port mapped to the game server.                                                          |
-| `SERVER_FILES`   | `./server` | Host folder the `update` script installs server files into.                                       |
-| `DATA_FILES`     | `./data`   | Host folder for game data (saves, server configs, mods, logs), mounted at `/home/steam/Zomboid`.  |
+| `SERVER_PATH`    | `./server` | Host folder the `update` script installs server files into.                                       |
+| `DATA_PATH`      | `./data`   | Host folder for game data (saves, server configs, mods, logs), mounted at `/home/steam/Zomboid`.  |
 | `JVM_MIN_MEMORY` | _(none)_   | Initial JVM heap size, passed as `-Xms`, e.g. `4g`.                                               |
 | `JVM_MAX_MEMORY` | _(none)_   | Maximum JVM heap size, passed as `-Xmx`, e.g. `8g`. Raise this for more players or mods.          |
 
