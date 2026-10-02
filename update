@@ -10,20 +10,16 @@ if ! [[ $(docker compose ps -q | wc -l) = "0" ]]; then
         exit 1
 fi
 
-# Load the .env file to know where the `SERVER_FILES` value
+# Load the .env file to know the `SERVER_FILES` and `DATA_FILES` values
 source .env
-mkdir -p $SERVER_FILES
-# if the `server` folder is not `1000:1000`, set it.
-if ! [[ $(stat --format '%u:%g' $SERVER_FILES) = '1000:1000' ]]; then
-        echo "Requires root to fixup ownership of server folder"
-        sudo chown 1000:1000 -R $SERVER_FILES
-fi
-mkdir -p $DATA_FILES
-# if the `data` folder is not `1000:1000`, set it.
-if ! [[ $(stat --format '%u:%g' $DATA_FILES) = '1000:1000' ]]; then
-        echo "Requires root to fixup ownership of data folder"
-        sudo chown 1000:1000 -R $DATA_FILES
-fi
+# Ensure each mounted folder exists and is owned by `1000:1000`.
+for dir in "$SERVER_FILES" "$DATA_FILES"; do
+        mkdir -p "$dir"
+        if [[ $(stat --format '%u:%g' "$dir") != '1000:1000' ]]; then
+                echo "Requires root to fixup ownership of $dir"
+                sudo chown 1000:1000 -R "$dir"
+        fi
+done
 
 # Path inside the container to `steamcmd`, I wish it was just in PATH...
 STEAMCMD_PATH=/home/steam/steamcmd/steamcmd.sh
