@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+# Work from this scripts location
+cd "$(dirname "$0")"
+
+# Back out of an update if the compose stack is already running.
+if ! [[ $(docker compose ps -q | wc -l) = "0" ]]; then
+        echo 'Project Zomboid server currently running. Run `docker compose down` before updating.'
+        exit 1
+fi
+
+# Load the .env file to know where the `SERVER_FILES` value
+source .env
+mkdir -p $SERVER_FILES
+# if the `server` folder is not `1000:1000`, set it.
+if ! [[ $(stat --format '%u:%g' $SERVER_FILES) = '1000:1000' ]]; then
+        echo "Requires root to fixup ownership of server folder"
+        sudo chown 1000:1000 -R $SERVER_FILES
+fi
+
+
+# Path inside the container to `steamcmd`, I wish it was just in PATH...
+STEAMCMD_PATH=/home/steam/steamcmd/steamcmd.sh
+docker compose run --rm project-zomboid $STEAMCMD_PATH +runscript /steamcmd-script
+echo 'Project Zomboid server updated. Run `docker compose up` to start the server'

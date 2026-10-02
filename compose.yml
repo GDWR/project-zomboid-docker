@@ -1,0 +1,31 @@
+services:
+  project-zomboid:
+    image: cm2network/steamcmd 
+    entrypoint: "bash"
+    command: [
+      "/opt/server/start-server.sh",
+      "${JVM_ARGS:-}",
+      "--",
+      "-servername",    "${SERVER_NAME:-MyWorld}",
+      "-adminpassword", "${ADMIN_PASSWORD?Admin password required, edit the `.env` file}",
+      "-adminusername", "${ADMIN_USERNAME:-admin}" 
+    ]
+    volumes:
+      - ${SERVER_PATH:-./server}:/opt/server
+    ports:
+      - ${SERVER_PORT:-16261}:16261/udp
+    configs:
+      - steamcmd-script
+
+configs:
+  # The steamcmd script used to initally install, and to update the game server
+  #   https://developer.valvesoftware.com/wiki/SteamCMD#Creating_a_Script
+  steamcmd-script:
+    content: |
+      @ShutdownOnFailedCommand 1
+      @NoPromptForPassword 1
+      force_install_dir /opt/server/
+
+      login anonymous
+      app_update 380870 validate
+      quit
