@@ -4,12 +4,12 @@ services:
     entrypoint: "bash"
     command: [
       "/opt/server/start-server.sh",
-      "${JVM_ARGS:-}",
-      "--",
       "-servername",    "${SERVER_NAME:-MyWorld}",
       "-adminpassword", "${ADMIN_PASSWORD?Admin password required, edit the `.env` file}",
       "-adminusername", "${ADMIN_USERNAME:-admin}" 
     ]
+    environment:
+      JAVA_TOOL_OPTIONS: "${JVM_MIN_MEMORY:+-Xms$JVM_MIN_MEMORY} ${JVM_MAX_MEMORY:+-Xmx$JVM_MAX_MEMORY}"
     volumes:
       - ${SERVER_PATH:-./server}:/opt/server
       - ${DATA_PATH:-./data}:/home/steam/Zomboid

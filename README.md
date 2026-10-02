@@ -48,12 +48,15 @@ All settings are in [`.env`](.env):
 | `SERVER_PORT`    | `16261`    | Host UDP port mapped to the game server.                                                          |
 | `SERVER_FILES`   | `./server` | Host folder the `update` script installs server files into.                                       |
 | `DATA_FILES`     | `./data`   | Host folder for game data (saves, server configs, mods, logs), mounted at `/home/steam/Zomboid`.  |
-| `JVM_ARGS`       | _(none)_   | Extra JVM arguments, e.g. `-Xmx8g` to raise memory. See [JVM arguments][jvm].                     |
+| `JVM_MIN_MEMORY` | _(none)_   | Initial JVM heap size, passed as `-Xms`, e.g. `4g`.                                               |
+| `JVM_MAX_MEMORY` | _(none)_   | Maximum JVM heap size, passed as `-Xmx`, e.g. `8g`. Raise this for more players or mods.          |
+
+The memory settings are passed to Java through the `JAVA_TOOL_OPTIONS` environment variable. If you leave them unset,
+the server's default memory settings apply.
 
 See the wiki for more [server startup parameters][params].
 
 [params]: https://pzwiki.net/wiki/Startup_parameters#Server
-[jvm]: https://pzwiki.net/wiki/Startup_parameters#JVM_arguments
 
 ### Server settings and mods
 
@@ -86,7 +89,8 @@ docker compose up -d
 
 - [`compose.yml`](compose.yml) defines a single `project-zomboid` service. It mounts the server folder at `/opt/server`
   and the data folder at `/home/steam/Zomboid` (where the game stores its saves and configs), and launches the game's
-  own `start-server.sh` with the name and admin credentials from `.env`.
+  own `start-server.sh` with the name and admin credentials from `.env`. JVM memory limits are set through
+  `JAVA_TOOL_OPTIONS`.
 - An inline Compose config, `steamcmd-script`, holds the SteamCMD script that anonymously installs app `380870`
   (Project Zomboid Dedicated Server) into `/opt/server`.
 - [`update`](update) creates the server and data folders, makes sure they're owned by UID/GID `1000` (the `steam`
